@@ -1,0 +1,58 @@
+# --- FlowMind local data: never publish -------------------------------------
+# The database is created empty on first run and holds pilot sessions,
+# interview answers, feedback and captured activity.
+flowmind.db
+flowmind.db-wal
+flowmind.db-shm
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.journal
+backups/
+pilot-results*.csv
+*.csv
+
+# --- secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- logs and run output -----------------------------------------------------
+*.log
+logs/
+server.stdout.log
+server.stderr.log
+tests/screenshots/
+
+# --- python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# --- node (not used today, kept so a later UI build cannot leak) -------------
+node_modules/
+
+# --- editors and os ----------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- scratch -----------------------------------------------------------------
+tmp/
+temp/
+*.zip
+
+# --- local publishing helpers (not part of the project) -----------------------
+PUBLISH-TO-GITHUB.bat
+PUSH-NOW.bat

@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --canvas: #EFF0F4;
+  --blue: #6192FC;
+  --blue-soft: #EAF0FF;
+  --blue-line: #C9DAFF;
+  --navy: #11358B;
+  --lime: #C7EF66;
+  --muted: #667295;
+  --muted-soft: #8C96B4;
+  --line: #E3E6EF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 320px;
+  margin: 0;
+  background: var(--canvas);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  color: var(--navy);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.header {
+  background: #fff;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mark {
+  width: 32px; height: 32px; border-radius: 10px; background: var(--blue);
+  display: grid; place-items: center; flex: none;
+  box-shadow: 0 5px 14px rgba(97, 146, 252, .3);
+}
+.brand { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+.tagline { font-size: 11px; color: var(--muted-soft); margin-top: -3px; }
+
+.status {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 600;
+  padding: 5px 11px; border-radius: 999px;
+  background: #F1F8F3; color: #1E7A48;
+}
+.status.paused { background: #F1F2F6; color: var(--muted); }
+.status.offline { background: #FDF3E4; color: #8A5B12; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.dot.live { box-shadow: 0 0 0 3px rgba(56, 178, 106, .18); }
+
+.section { padding: 16px 18px 0; }
+.eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted-soft); margin-bottom: 10px;
+}
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat {
+  background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; padding: 11px 13px;
+}
+.stat .v { font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+.stat .l { font-size: 11px; color: var(--muted); margin-top: -2px; }
+
+.insight {
+  background: #fff; border: 1px solid var(--line);
+  border-radius: 14px; padding: 15px;
+}
+.insight .title { font-size: 13.5px; font-weight: 600; margin-bottom: 11px; }
+.flow { display: flex; flex-direction: column; gap: 3px; margin-bottom: 11px; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; }
+.ic {
+  width: 19px; height: 19px; border-radius: 6px; flex: none;
+  display: grid; place-items: center; font-size: 8.5px; font-weight: 700; color: #fff;
+  background: var(--blue);
+}
+.ic.Email { background: #6192FC; }
+.ic.Spreadsheet { background: #2FA36B; }
+.ic.CRM { background: #11358B; }
+.ic.Project { background: #8A6BE0; }
+.ic.Other { background: #9AA3BE; }
+.arrow { margin-left: 9px; }
+
+.reps {
+  display: inline-block; background: #F2FBDD; color: #0B2461;
+  font-size: 11.5px; font-weight: 600; padding: 3px 10px;
+  border-radius: 999px; margin-bottom: 12px;
+}
+
+.empty {
+  background: #fff; border: 1px dashed var(--blue-line);
+  border-radius: 14px; padding: 18px 16px; text-align: center;
+}
+.empty .t { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+.empty .d { font-size: 12px; color: var(--muted); }
+
+.btn {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  border-radius: 999px; padding: 9px 16px; cursor: pointer;
+  border: 1px solid transparent; width: 100%;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #4f83f8; }
+.btn-secondary { background: #fff; color: var(--navy); border-color: var(--line); }
+.btn-secondary:hover { background: var(--blue-soft); border-color: var(--blue-line); }
+
+.controls { padding: 16px 18px 18px; display: grid; gap: 8px; }
+.footnote {
+  text-align: center; font-size: 10.5px; color: var(--muted-soft);
+  padding: 0 18px 14px;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 10px 4px 4px; font-size: 11.5px; font-weight: 600; color: var(--navy);
+}
+.approved .empty { padding: 12px; }

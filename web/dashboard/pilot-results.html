@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowMind — Pilot results</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%2311358B'/><path d='M6 21c4-10 16-10 20 0' stroke='white' stroke-width='2.8' fill='none' stroke-linecap='round'/><circle cx='16' cy='11' r='2.6' fill='%23C7EF66'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css?v=3.1">
+<link rel="stylesheet" href="/static/dashboard/dashboard.css?v=3.1">
+<style>
+  body { display: block; }
+  .shell { max-width: 1060px; margin: 0 auto; padding: 40px 22px 90px; }
+  .snapshot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .snapshot { grid-template-columns: repeat(2, 1fr); } }
+  .snap {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px;
+  }
+  .snap .v { font-size: 30px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; line-height: 1.1; }
+  .snap .v.none { color: var(--muted-soft); font-size: 22px; font-weight: 600; }
+  .snap .l { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .snap .n { font-size: 11px; color: var(--muted-soft); margin-top: 6px; }
+
+  .funnel { display: flex; flex-direction: column; gap: 4px; }
+  .frow { display: flex; align-items: center; gap: 14px; padding: 9px 0; }
+  .frow .k { width: 180px; font-size: 13.5px; font-weight: 500; }
+  .frow .track { flex: 1; height: 26px; border-radius: 8px; background: var(--canvas); overflow: hidden; }
+  .frow .track > span {
+    display: flex; align-items: center; justify-content: flex-end;
+    height: 100%; background: var(--blue); border-radius: 8px;
+    color: #fff; font-size: 12px; font-weight: 600; padding-right: 9px; min-width: 2px;
+  }
+  .frow .track > span.last { background: var(--lime); color: var(--navy-deep); }
+  .frow .n { width: 96px; text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .drop { font-size: 12px; color: #B3372F; }
+
+  .barrow { display: flex; align-items: center; gap: 12px; padding: 7px 0; }
+  .barrow .k { width: 140px; font-size: 13.5px; }
+  .barrow .track { flex: 1; height: 9px; border-radius: 5px; background: var(--canvas); overflow: hidden; }
+  .barrow .track > span { display: block; height: 100%; background: var(--blue); border-radius: 5px; }
+  .barrow .track.lime > span { background: var(--lime); }
+  .barrow .n { width: 76px; text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .quote { border-left: 3px solid var(--blue-line); padding: 3px 0 3px 15px; margin: 13px 0; }
+  .quote p { font-size: 14.5px; }
+  .segmented { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .segmented button {
+    font-family: var(--font); font-size: 13px; font-weight: 600; border: 0; background: none;
+    color: var(--muted); border-radius: 999px; padding: 7px 16px; cursor: pointer;
+  }
+  .segmented button.active { background: var(--navy); color: #fff; }
+  .srow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .srow:last-child { border-bottom: 0; }
+  .assist { display: flex; gap: 6px; margin-left: auto; }
+  .assist button {
+    font-family: var(--font); font-size: 12px; font-weight: 600;
+    border: 1px solid var(--line); background: #fff; color: var(--muted);
+    border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  }
+  .assist button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .warn {
+    background: #FDF3E4; border: 1px solid #E8A33D; border-radius: 14px;
+    padding: 13px 18px; font-size: 13.5px; color: #7A4B10; margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="row between wrap" style="margin-bottom:10px">
+    <a class="small muted" href="/">← FlowMind</a>
+    <div class="row" style="gap:10px">
+      <div class="segmented" id="scope">
+        <button data-type="REAL_PILOT" class="active">Real pilot</button>
+        <button data-type="DEMO">Demo sessions</button>
+      </div>
+      <a class="btn btn-secondary btn-sm" id="export" href="/api/pilot-results.csv?session_type=REAL_PILOT">Export CSV</a>
+    </div>
+  </div>
+
+  <div class="pagehead" style="margin:18px 0 24px">
+    <div class="eyebrow" style="margin-bottom:8px">Internal · not linked from the participant experience</div>
+    <h1>Pilot results</h1>
+    <p class="muted" style="margin-top:8px" id="scope-note"></p>
+  </div>
+
+  <div id="body"><p class="muted">Loading…</p></div>
+</div>
+
+<script src="/static/shared/flowmind.js?v=3.1"></script>
+<script>
+let scope = 'REAL_PILOT';
+let data = null;
+
+const LABELS = {
+  understanding_rating: 'Correctly understood the finding',
+  repetition_rating: 'Genuinely repetitive in their job',
+  usefulness_rating: 'Found the insight useful',
+  investigate_rating: 'Would investigate the workflow',
+  continued_use_rating: 'Would continue using FlowMind',
+  permission_comfort: 'Comfortable with the permission model',
+};
+
+/** A percentage is only shown when someone actually answered. */
+function pct(block) {
+  return block.answered ? `${block.positive_pct}%` : '—';
+}
+
+function snapCard(value, label, note, muted) {
+  return `<div class="snap">
+    <div class="v ${muted ? 'none' : ''}">${value}</div>
+    <div class="l">${label}</div>
+    <div class="n">${note}</div>
+  </div>`;
+}
+
+function funnelBlock() {
+  const started = data.funnel[0].count || 0;
+  const rows = data.funnel.map((f, i) => {
+    const width = started ? Math.max(1, Math.round(f.count / started * 100)) : 0;
+    const prev = i > 0 ? data.funnel[i - 1].count : null;
+    const lost = prev !== null ? prev - f.count : 0;
+    return `<div class="frow">
+      <div class="k">${FM.escape(f.label)}</div>
+      <div class="track"><span class="${i === data.funnel.length - 1 ? 'last' : ''}"
+        style="width:${width}%">${f.count ? f.count : ''}</span></div>
+      <div class="n">${f.pct === null ? '—' : f.pct + '%'}
+        ${lost > 0 ? `<div class="drop">−${lost}</div>` : ''}</div>
+    </div>`;
+  }).join('');
+  return `<div class="card" style="margin-bottom:20px">
+    <div class="eyebrow" style="margin-bottom:6px">Pilot funnel</div>
+    <p class="tiny muted" style="margin-bottom:14px">
+      Where participants stop. Counted from recorded milestones — nothing is estimated.</p>
+    <div class="funnel">${rows}</div>
+  </div>`;
+}
+
+function bars(title, field) {
+  const block = data.ratings[field];
+  const rows = Object.entries(block.counts).map(([k, v]) => `
+    <div class="barrow">
+      <div class="k">${FM.escape(k)}</div>
+      <div class="track ${['Yes', 'Very useful'].includes(k) ? 'lime' : ''}">
+        <span style="width:${block.answered ? Math.round(v / block.answered * 100) : 0}%"></span></div>
+      <div class="n">${v}${block.answered ? ` · ${Math.round(v / block.answered * 100)}%` : ''}</div>
+    </div>`).join('');
+  return `<div class="card" style="margin-bottom:14px">
+    <div class="row between" style="margin-bottom:8px">
+      <div class="eyebrow">${title}</div>
+      <b style="font-size:19px">${pct(block)}</b>
+    </div>${rows}
+    <p class="tiny muted" style="margin-top:8px">${block.answered} of ${data.participants} participants answered.</p>
+  </div>`;
+}
+
+function verbatims(title, items, empty) {
+  return `<div class="card" style="margin-bottom:14px">
+    <div class="eyebrow" style="margin-bottom:6px">${title}</div>
+    <p class="tiny muted" style="margin-bottom:10px">Participants' own words, unedited.</p>
+    ${items.length ? items.map(q => `<div class="quote">
+      <p>“${FM.escape(q.text)}”</p>
+      <p class="tiny muted" style="margin-top:4px">${FM.escape(q.code)} · ${FM.day(q.created_at)}</p>
+    </div>`).join('') : `<p class="small muted">${empty}</p>`}
+  </div>`;
+}
+
+function dist(title, obj) {
+  const entries = Object.entries(obj);
+  return `<div class="card">
+    <div class="eyebrow" style="margin-bottom:10px">${title}</div>
+    ${entries.length ? entries.map(([k, v]) => `
+      <div class="row between" style="padding:7px 0;border-bottom:1px solid var(--line)">
+        <span>${FM.escape(k || 'Not given')}</span><b>${v}</b></div>`).join('')
+      : '<p class="small muted">No participants yet.</p>'}
+  </div>`;
+}
+
+function sessionsBlock() {
+  const levels = ['No assistance', 'Minor assistance', 'Significant assistance'];
+  return `<div class="card" style="margin-bottom:14px">
+    <div class="eyebrow" style="margin-bottom:6px">Sessions · assistance</div>
+    <p class="tiny muted" style="margin-bottom:10px">
+      Marked by the facilitator, never by the participant. Unmarked sessions are not counted
+      as unassisted.</p>
+    ${data.sessions.length ? data.sessions.map(x => `
+      <div class="srow">
+        <b>${FM.escape(x.code)}</b>
+        <span class="small muted">${FM.escape(x.role || 'role not given')}
+          ${x.minutes ? ` · ${x.minutes} min` : ''}
+          ${x.completed ? '' : ' · <span style="color:#B3372F">did not finish</span>'}</span>
+        <span class="assist">
+          ${levels.map(l => `<button data-session="${x.id}" data-level="${l}"
+            class="${x.assistance_level === l ? 'on' : ''}">${l.replace(' assistance', '')}</button>`).join('')}
+        </span>
+      </div>`).join('') : '<p class="small muted">No sessions yet.</p>'}
+  </div>`;
+}
+
+function notesBlock() {
+  return `<div class="card" style="margin-bottom:14px">
+    <div class="eyebrow" style="margin-bottom:6px">What we changed after testing</div>
+    <p class="tiny muted" style="margin-bottom:12px">
+      Build → test → learn → improve. Add only what you actually observed.</p>
+    ${data.notes.map(n => `
+      <div class="quote" style="border-left-color:var(--lime)">
+        <p><b>Problem:</b> ${FM.escape(n.problem)}</p>
+        <p style="margin-top:4px"><b>Change:</b> ${FM.escape(n.change_made)}</p>
+        ${n.reason ? `<p style="margin-top:4px"><b>Reason:</b> ${FM.escape(n.reason)}</p>` : ''}
+        <p class="tiny muted" style="margin-top:5px">${FM.day(n.created_at)}
+          · <a href="#" data-delnote="${n.id}">remove</a></p>
+      </div>`).join('') || '<p class="small muted">Nothing recorded yet.</p>'}
+    <hr class="divider">
+    <div class="stack" style="gap:8px">
+      <input class="input" id="note-problem" placeholder="Problem observed (e.g. 2 of 5 did not realise analysis had started)">
+      <input class="input" id="note-change" placeholder="Change made">
+      <input class="input" id="note-reason" placeholder="Reason (optional)">
+      <div><button class="btn btn-secondary btn-sm" id="note-add">Add entry</button></div>
+    </div>
+  </div>`;
+}
+
+function errorsBlock() {
+  return `<div class="card">
+    <div class="eyebrow" style="margin-bottom:6px">Pilot issues</div>
+    <p class="tiny muted" style="margin-bottom:10px">
+      Technical faults during sessions, so a drop-off can be told apart from a failure.
+      No work content is ever captured.</p>
+    ${data.errors.length ? data.errors.slice(0, 25).map(e => `
+      <div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line);gap:12px">
+        <span class="small"><b>${FM.escape(e.kind)}</b>
+          <span class="muted">${FM.escape(e.route)}</span></span>
+        <span class="tiny muted">${FM.escape(e.code || '—')} · ${FM.clock(e.created_at)}</span>
+      </div>`).join('') : '<p class="small muted">No technical issues recorded.</p>'}
+  </div>`;
+}
+
+async function render() {
+  data = await FM.safeApi('/api/pilot-results?session_type=' + scope, {}, null);
+  const box = document.getElementById('body');
+  if (!data) {
+    box.innerHTML = `<div class="empty"><h3>FlowMind service is not reachable</h3>
+      <p>Start the backend and reload.</p></div>`;
+    return;
+  }
+  document.getElementById('export').href = '/api/pilot-results.csv?session_type=' + scope;
+  document.getElementById('scope-note').textContent = scope === 'REAL_PILOT'
+    ? 'Calculated only from what real participants submitted. Demo sessions are excluded.'
+    : 'Demo sessions. For showing the product — never cite these as validation evidence.';
+
+  const n = data.participants;
+  const a = data.assistance;
+  const small = n > 0 && n < 5;
+
+  box.innerHTML = `
+    ${small ? `<div class="warn"><b>Small sample.</b> ${n} participant${n === 1 ? '' : 's'} so far —
+      report these as counts, not as percentages, when you present.</div>` : ''}
+
+    <div class="eyebrow" style="margin-bottom:10px">Validation snapshot</div>
+    <div class="snapshot" style="margin-bottom:14px">
+      ${snapCard(n, 'Real pilot participants', data.median_minutes
+          ? `median ${data.median_minutes} min to complete` : 'no completions timed yet')}
+      ${snapCard(`${a.unassisted} / ${n}`, 'Completed without assistance',
+          a.marked < n ? `${n - a.marked} session(s) not yet marked` : 'all sessions marked')}
+      ${snapCard(pct(data.ratings.understanding_rating), 'Correctly understood the finding',
+          `${data.ratings.understanding_rating.answered} answered`,
+          !data.ratings.understanding_rating.answered)}
+      ${snapCard(pct(data.ratings.repetition_rating), 'Genuinely repetitive work',
+          `${data.ratings.repetition_rating.answered} answered`,
+          !data.ratings.repetition_rating.answered)}
+    </div>
+    <div class="snapshot" style="margin-bottom:24px">
+      ${snapCard(pct(data.ratings.usefulness_rating), 'Found the insight useful',
+          `${data.ratings.usefulness_rating.answered} answered`, !data.ratings.usefulness_rating.answered)}
+      ${snapCard(pct(data.ratings.investigate_rating), 'Would investigate the workflow',
+          `${data.ratings.investigate_rating.answered} answered`, !data.ratings.investigate_rating.answered)}
+      ${snapCard(pct(data.ratings.continued_use_rating), 'Would continue using FlowMind',
+          `${data.ratings.continued_use_rating.answered} answered`, !data.ratings.continued_use_rating.answered)}
+      ${snapCard(pct(data.ratings.permission_comfort), 'Comfortable with permissions',
+          `${data.ratings.permission_comfort.answered} answered`, !data.ratings.permission_comfort.answered)}
+    </div>
+
+    ${funnelBlock()}
+    ${sessionsBlock()}
+
+    <div class="eyebrow" style="margin:24px 0 12px">Responses</div>
+    ${Object.keys(LABELS).map(k => bars(LABELS[k], k)).join('')}
+
+    <div class="eyebrow" style="margin:24px 0 12px">Qualitative evidence</div>
+    ${verbatims('What employees think FlowMind does', data.understanding_texts,
+      'Nobody has answered that question yet.')}
+    ${verbatims('What FlowMind missed', data.missed_texts, 'No answers yet.')}
+    ${verbatims('Repetitive tasks employees want help with', data.wished_texts, 'No answers yet.')}
+    ${verbatims('Why they would or would not investigate', data.investigate_texts, 'No answers yet.')}
+    ${verbatims('On the permission model', data.permission_texts, 'No answers yet.')}
+
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0">
+      ${dist('Industries', data.industries)}
+      ${dist('Roles', data.roles)}
+      ${dist('Company size', data.company_sizes)}
+    </div>
+
+    ${notesBlock()}
+    ${errorsBlock()}`;
+
+  wire();
+}
+
+function wire() {
+  document.querySelectorAll('.assist button').forEach(b => b.onclick = async () => {
+    const r = await FM.safeApi('/api/pilot/assistance', {
+      method: 'POST',
+      body: JSON.stringify({ session_id: Number(b.dataset.session), level: b.dataset.level }),
+    }, null);
+    if (!r) return FM.toast('Could not save that');
+    render();
+  });
+
+  const add = document.getElementById('note-add');
+  if (add) add.onclick = async () => {
+    const problem = document.getElementById('note-problem').value.trim();
+    const change = document.getElementById('note-change').value.trim();
+    if (!problem || !change) return FM.toast('Describe the problem and the change');
+    const r = await FM.safeApi('/api/pilot/notes', {
+      method: 'POST',
+      body: JSON.stringify({ problem, change_made: change,
+                             reason: document.getElementById('note-reason').value.trim() || null }),
+    }, null);
+    if (!r) return FM.toast('Could not save that entry');
+    render();
+  };
+
+  document.querySelectorAll('[data-delnote]').forEach(a => a.onclick = async (e) => {
+    e.preventDefault();
+    await FM.safeApi('/api/pilot/notes/' + a.dataset.delnote, { method: 'DELETE' }, null);
+    render();
+  });
+}
+
+document.querySelectorAll('#scope button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#scope button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  scope = b.dataset.type;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

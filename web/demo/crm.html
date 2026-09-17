@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowCRM — Customer Record</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2311358B'/><circle cx='16' cy='13' r='4' fill='none' stroke='white' stroke-width='2'/><path d='M9 24c1.5-4 4-6 7-6s5.5 2 7 6' fill='none' stroke='white' stroke-width='2'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css">
+<link rel="stylesheet" href="/static/demo/demo.css">
+</head>
+<body class="crm">
+<div id="strip"></div>
+
+<div class="appbar">
+  <div class="applogo">FC</div>
+  <div>
+    <div class="appname">FlowCRM</div>
+    <div class="tiny muted" style="margin-top:-2px">Customer records</div>
+  </div>
+  <div class="who"><span>Operations workspace</span><span class="avatar">OP</span></div>
+</div>
+
+<div class="shell">
+  <div id="content"></div>
+</div>
+
+<script src="/static/shared/flowmind.js"></script>
+<script src="/static/demo/demo.js"></script>
+<script>
+async function render() {
+  const data = await DEMO.load();
+  const current = DEMO.current();
+
+  document.getElementById('strip').innerHTML = DEMO.strip({
+    step: 3, total: 4,
+    instruction: current
+      ? `Paste reference <b>${current.id}</b> into the customer record and save.`
+      : 'All requests handled.',
+    data,
+  });
+
+  const el = document.getElementById('content');
+
+  if (!current) {
+    el.innerHTML = `
+      <div class="done-banner">
+        <span class="appicon CRM">✓</span>
+        <div>
+          <div style="font-weight:600">Every customer record is up to date.</div>
+          <div class="small muted">All ${data.total} requests have been handled.</div>
+        </div>
+        <span class="spacer"></span>
+        <a class="btn btn-primary" href="/">Back to FlowMind</a>
+      </div>`;
+    return;
+  }
+
+  const saved = current.crm_done;
+  el.innerHTML = `
+    <div class="crmgrid">
+      <div class="crmcard">
+        <div class="row" style="gap:12px;margin-bottom:14px">
+          <span class="appicon CRM" style="width:38px;height:38px;border-radius:12px;font-size:13px">
+            ${current.customer.split(' ').map(s => s[0]).join('')}</span>
+          <div>
+            <div style="font-weight:700;font-size:16px;color:#1B2440">${FM.escape(current.customer)}</div>
+            <div class="tiny muted">Customer since 2024</div>
+          </div>
+        </div>
+        <div class="crmfield"><div class="k">Account status</div><div class="v">Active</div></div>
+        <div class="crmfield"><div class="k">Open orders</div><div class="v">1</div></div>
+        <div class="crmfield"><div class="k">Last contact</div><div class="v">Today, via support inbox</div></div>
+      </div>
+
+      <div class="crmcard">
+        <div class="row between wrap" style="margin-bottom:6px">
+          <h2 style="font-size:18px">Update customer record</h2>
+          <span class="pill ${saved ? 'pill-high' : 'pill-low'}">${saved ? 'Saved' : 'Unsaved changes'}</span>
+        </div>
+        <p class="small muted" style="margin-bottom:18px">
+          Record the order this address change relates to, and set the record status.
+        </p>
+
+        <div class="stack" style="gap:16px">
+          <div>
+            <div class="crmfield" style="padding-top:0;border:0">
+              <div class="k">Linked order reference</div>
+            </div>
+            <input class="textinput" id="ref" placeholder="Paste the order reference (Ctrl+V)"
+                   value="${saved ? current.id : ''}" autocomplete="off">
+            <div class="hintline">Copied from FlowSheet. Paste with <kbd>Ctrl</kbd>+<kbd>V</kbd>.</div>
+          </div>
+
+          <div>
+            <div class="crmfield" style="padding-top:0;border:0"><div class="k">Record status</div></div>
+            <select class="textinput" id="status">
+              <option value="">Select a status…</option>
+              <option value="address_updated" ${saved ? 'selected' : ''}>Delivery address updated</option>
+              <option value="pending">Pending verification</option>
+              <option value="no_change">No change required</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="crmfield" style="padding-top:0;border:0"><div class="k">Delivery address on record</div></div>
+            <div class="v" style="font-size:14px">${FM.escape(current.sheet_done ? current.new_value : current.old_value)}</div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        ${saved ? `
+          <div class="nextstep" style="margin-top:0">
+            <span class="n">4</span>
+            <div style="flex:1;min-width:220px">
+              <b>Record saved.</b>
+              <span class="muted">Go back to FlowMail and mark the request as handled.</span>
+            </div>
+            <a class="btn btn-primary" href="/demo/mail">Back to FlowMail →</a>
+          </div>` : `
+          <div class="row wrap">
+            <button class="btn btn-primary" onclick="save('${current.id}')">Save customer record</button>
+            <a class="btn btn-ghost btn-sm" href="/demo/sheet">← Back to FlowSheet</a>
+          </div>`}
+      </div>
+    </div>`;
+
+  if (!saved) {
+    const ref = document.getElementById('ref');
+    if (ref) ref.focus();
+  }
+}
+
+async function save(id) {
+  const ref = document.getElementById('ref');
+  const status = document.getElementById('status');
+  if (!ref.value.trim()) { FM.toast('Paste the order reference first (Ctrl+V)'); ref.focus(); return; }
+  if (!status.value) { FM.toast('Select a record status'); status.focus(); return; }
+  await DEMO.mark(id, 'crm');
+  await render();
+  FM.toast('Customer record saved');
+}
+
+render();
+</script>
+</body>
+</html>

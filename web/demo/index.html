@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test FlowMind</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%236192FC'/><path d='M8 20c4-9 12-9 16 0' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round'/><circle cx='16' cy='12' r='2.3' fill='%23C7EF66'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css">
+<link rel="stylesheet" href="/static/demo/demo.css">
+<style>
+  .testshell { max-width: 760px; margin: 0 auto; padding: 54px 22px 80px; }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  .steps li {
+    counter-increment: s;
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 13px 0; border-bottom: 1px solid var(--line);
+  }
+  .steps li:last-child { border-bottom: 0; }
+  .steps li::before {
+    content: counter(s);
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue-soft); color: var(--navy);
+    display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 700; flex: none;
+  }
+  .brandmark {
+    width: 44px; height: 44px; border-radius: 14px; background: var(--blue);
+    display: grid; place-items: center; box-shadow: 0 8px 20px rgba(97,146,252,.3);
+  }
+  .statusbox {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 12px; font-size: 13.5px;
+    border: 1px solid var(--line); background: #fff;
+  }
+</style>
+</head>
+<body>
+<div class="testshell">
+
+  <div class="row" style="gap:14px;margin-bottom:30px">
+    <div class="brandmark">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <path d="M6 21c4-10 16-10 20 0" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
+        <circle cx="16" cy="12" r="2.6" fill="#C7EF66"/>
+      </svg>
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:19px;color:var(--navy);letter-spacing:-.02em">FlowMind</div>
+      <div class="tiny muted" style="margin-top:-3px">Workflow Intelligence</div>
+    </div>
+  </div>
+
+  <div class="eyebrow" style="margin-bottom:8px">Guided test</div>
+  <h1 style="margin-bottom:12px">Complete this short workflow while FlowMind analyzes approved workflow metadata.</h1>
+  <p class="muted" style="margin-bottom:28px;font-size:16px">
+    It takes about five minutes. Work at your normal pace and use the applications as you
+    would at work. There is no right or wrong way to do it.
+  </p>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="eyebrow" style="margin-bottom:10px">Your task</div>
+    <ol class="steps">
+      <li><div><b>Open FlowMail</b><div class="small muted">A customer support inbox with delivery-address requests.</div></div></li>
+      <li><div><b>Find the order reference in the request</b><div class="small muted">For example ORD-2841.</div></div></li>
+      <li><div><b>Update that order in FlowSheet</b><div class="small muted">The operations spreadsheet holding delivery addresses.</div></div></li>
+      <li><div><b>Update the customer record in FlowCRM</b><div class="small muted">Link the order reference and set the record status.</div></div></li>
+      <li><div><b>Return to FlowMail and mark the request as handled</b></div></li>
+      <li><div><b>Repeat with the next requests</b><div class="small muted">Two to four is enough. There are five waiting in the inbox.</div></div></li>
+    </ol>
+  </div>
+
+  <div class="stack" style="gap:10px;margin-bottom:26px">
+    <div class="statusbox" id="ext-status">
+      <span class="dot dot-paused"></span><span>Checking for the FlowMind extension…</span>
+    </div>
+    <div class="statusbox" id="server-status">
+      <span class="dot dot-paused"></span><span>Checking FlowMind service…</span>
+    </div>
+  </div>
+
+  <div class="row wrap" style="gap:12px">
+    <a class="btn btn-primary" href="/demo/mail" style="font-size:15px;padding:13px 26px">Start the task →</a>
+    <button class="btn btn-secondary" onclick="resetDemo()">Reset demo</button>
+    <span class="spacer"></span>
+    <a class="btn btn-ghost btn-sm" href="/">Back to FlowMind</a>
+  </div>
+
+  <hr class="divider">
+
+  <details style="color:var(--muted)">
+    <summary class="small" style="cursor:pointer">If live tracking is unavailable (facilitator only)</summary>
+    <p class="small" style="margin:12px 0">
+      Generates a realistic activity stream through the same ingest and detection pipeline
+      the extension uses. Events created this way are labelled <span class="pill pill-sim">Simulated</span>
+      on the Activity page so nothing is ever presented as live when it is not.
+    </p>
+    <button class="btn btn-secondary btn-sm" onclick="generate()">Generate demo activity</button>
+  </details>
+</div>
+
+<script src="/static/shared/flowmind.js"></script>
+<script>
+async function checkServer() {
+  const box = document.getElementById('server-status');
+  try {
+    const st = await FM.api('/api/analysis/status');
+    box.innerHTML = st.recording
+      ? `<span class="dot dot-live"></span><span>FlowMind is analyzing approved workflow metadata right now.</span>`
+      : `<span class="dot dot-paused"></span><span>FlowMind is not analyzing yet — press <b>Continue</b> in FlowMind to start a work analysis first.</span>`;
+  } catch (e) {
+    box.innerHTML = `<span class="dot dot-paused"></span><span>FlowMind service is not reachable. Start the backend, then reload this page.</span>`;
+  }
+}
+
+function checkExtension() {
+  const box = document.getElementById('ext-status');
+  const installed = document.documentElement.dataset.flowmindExtension === 'active';
+  box.innerHTML = installed
+    ? `<span class="dot dot-live"></span><span>FlowMind extension is active.</span>`
+    : `<span class="dot dot-paused"></span><span>FlowMind extension not detected. You can still complete the task — use <b>Generate demo activity</b> below if no workflow is detected afterwards.</span>`;
+}
+
+async function resetDemo() {
+  await FM.safeApi('/api/reset', { method: 'POST' }, null);
+  FM.toast('Demo reset — activity cleared, five requests waiting');
+}
+
+async function generate() {
+  const r = await FM.safeApi('/api/demo/generate', { method: 'POST' }, null);
+  FM.toast(r ? `Generated ${r.inserted} events · ${r.patterns} pattern(s) detected` : 'Could not reach FlowMind service');
+}
+
+checkServer();
+setTimeout(checkExtension, 400);
+</script>
+</body>
+</html>

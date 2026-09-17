@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowMind — AI Business Consultant</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%236192FC'/><path d='M6 21c4-10 16-10 20 0' stroke='white' stroke-width='2.8' fill='none' stroke-linecap='round'/><circle cx='16' cy='11' r='2.6' fill='%23C7EF66'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css?v=3.1">
+<link rel="stylesheet" href="/static/dashboard/dashboard.css?v=3.1">
+</head>
+<body>
+
+<div id="build-banner" class="buildbanner"></div>
+
+<aside class="sidebar" id="sidebar" hidden>
+  <a class="brand" href="#/overview">
+    <span class="mark">
+      <svg width="19" height="19" viewBox="0 0 32 32" fill="none">
+        <path d="M6 21c4-10 16-10 20 0" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="16" cy="11.5" r="2.8" fill="#C7EF66"/>
+      </svg>
+    </span>
+    <span>
+      <span class="name">FlowMind</span>
+      <div class="tag">AI Business Consultant</div>
+    </span>
+  </a>
+
+  <nav class="nav" id="nav">
+    <a href="#/overview" data-route="overview">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+        <rect x="2.5" y="2.5" width="6" height="6" rx="2"/><rect x="11.5" y="2.5" width="6" height="6" rx="2"/>
+        <rect x="2.5" y="11.5" width="6" height="6" rx="2"/><rect x="11.5" y="11.5" width="6" height="6" rx="2"/>
+      </svg>Overview</a>
+    <a href="#/consultant" data-route="consultant">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v6A2.5 2.5 0 0 1 14.5 14H8l-4 3.2V14H5.5A2.5 2.5 0 0 1 3 11.5z" stroke-linejoin="round"/>
+      </svg>Consultant<span class="count" id="nav-count">0</span></a>
+    <a href="#/activity" data-route="activity">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+        <circle cx="10" cy="10" r="7.2"/><path d="M10 5.6V10l3 2" stroke-linecap="round"/>
+      </svg>Activity</a>
+    <a href="#/privacy" data-route="privacy">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+        <path d="M10 2.6 16 5v5c0 4-2.6 6.6-6 7.6C6.6 16.6 4 14 4 10V5z" stroke-linejoin="round"/>
+      </svg>Privacy</a>
+  </nav>
+
+  <div class="sidefoot">
+    <div class="statusbar" id="statusbar"><span class="dot dot-live"></span><span id="statustext">Ready</span></div>
+    <button class="btn btn-secondary btn-sm" id="new-pilot" style="justify-content:center">New analysis</button>
+    <div class="row" style="justify-content:center;gap:12px">
+      <a class="tiny muted" href="#/report">Business review</a>
+      <a class="tiny muted" id="help-link" href="#">Need help?</a>
+    </div>
+    <span class="tiny muted" style="text-align:center" id="session-code"></span>
+  </div>
+</aside>
+
+<main class="main" id="view">
+  <div class="loading">Starting FlowMind…</div>
+</main>
+
+<script src="/static/shared/flowmind.js?v=3.1"></script>
+<script src="/static/dashboard/app.js?v=3.1"></script>
+</body>
+</html>

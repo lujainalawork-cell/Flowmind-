@@ -1,0 +1,87 @@
+{
+  "manifest_version": 3,
+  "name": "FlowMind \u2014 AI Business Consultant",
+  "version": "3.0.0",
+  "description": "Records behavioural metadata about applications you explicitly approve, and only while a FlowMind work analysis is running. Never page content, text or clipboard data.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://mail.google.com/*",
+    "https://docs.google.com/*",
+    "https://sheets.google.com/*",
+    "https://outlook.office.com/*",
+    "https://outlook.live.com/*",
+    "https://app.hubspot.com/*",
+    "https://*.notion.so/*",
+    "https://trello.com/*",
+    "https://app.asana.com/*",
+    "https://app.slack.com/*",
+    "https://*.zendesk.com/*",
+    "https://*.freshdesk.com/*",
+    "https://app.intercom.com/*",
+    "https://secure.helpscout.net/*",
+    "https://web.whatsapp.com/*",
+    "https://*.salesforce.com/*",
+    "https://*.lightning.force.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://mail.google.com/*",
+        "https://docs.google.com/*",
+        "https://sheets.google.com/*",
+        "https://outlook.office.com/*",
+        "https://outlook.live.com/*",
+        "https://app.hubspot.com/*",
+        "https://*.notion.so/*",
+        "https://trello.com/*",
+        "https://app.asana.com/*",
+        "https://app.slack.com/*",
+        "https://*.zendesk.com/*",
+        "https://*.freshdesk.com/*",
+        "https://app.intercom.com/*",
+        "https://secure.helpscout.net/*",
+        "https://web.whatsapp.com/*",
+        "https://*.salesforce.com/*",
+        "https://*.lightning.force.com/*"
+      ],
+      "js": [
+        "classify.js",
+        "content.js"
+      ],
+      "css": [
+        "bubble.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "FlowMind",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "optional_host_permissions": [
+    "https://*/*"
+  ]
+}

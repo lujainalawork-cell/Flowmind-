@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowMail — Support Inbox</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A6CF7'/><path d='M7 11h18v10H7z' fill='none' stroke='white' stroke-width='2'/><path d='M7 11l9 6 9-6' fill='none' stroke='white' stroke-width='2'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css">
+<link rel="stylesheet" href="/static/demo/demo.css">
+</head>
+<body class="mail">
+<div id="strip"></div>
+
+<div class="appbar">
+  <div class="applogo">FM</div>
+  <div>
+    <div class="appname">FlowMail</div>
+    <div class="tiny muted" style="margin-top:-2px">Support Inbox</div>
+  </div>
+  <div class="who"><span>support@northwind-demo.co</span><span class="avatar">SA</span></div>
+</div>
+
+<div class="shell">
+  <div id="banner"></div>
+  <div class="maillayout">
+    <div class="maillist" id="maillist"></div>
+    <div id="reading"></div>
+  </div>
+</div>
+
+<script src="/static/shared/flowmind.js"></script>
+<script src="/static/demo/demo.js"></script>
+<script>
+let selected = null;
+
+async function render() {
+  const data = await DEMO.load();
+  const current = DEMO.current();
+  if (!selected || !DEMO.orders.find(o => o.id === selected && !o.mail_done)) {
+    selected = current ? current.id : null;
+  }
+
+  document.getElementById('strip').innerHTML = DEMO.strip({
+    step: 1, total: 4,
+    instruction: current
+      ? `Open the request for <b>${current.id}</b> and copy the new address.`
+      : 'All requests handled.',
+    data,
+  });
+
+  document.getElementById('banner').innerHTML = DEMO.allDone(data) ? `
+    <div class="done-banner">
+      <span class="appicon Email" style="background:#1F9D62">✓</span>
+      <div>
+        <div style="font-weight:600">All ${data.total} requests have been handled.</div>
+        <div class="small muted">You can close this tab and open the FlowMind dashboard.</div>
+      </div>
+      <span class="spacer"></span>
+      <a class="btn btn-primary" href="/">Back to FlowMind</a>
+    </div>` : '';
+
+  document.getElementById('maillist').innerHTML = DEMO.orders.map(o => `
+    <div class="mailitem ${o.id === selected ? 'active' : ''} ${o.mail_done ? 'done' : ''}"
+         onclick="select('${o.id}')">
+      <span class="appicon Email">${o.customer.split(' ').map(s => s[0]).join('')}</span>
+      <div style="min-width:0">
+        <div class="from">${FM.escape(o.customer)}</div>
+        <div class="sub">${FM.escape(o.request)}</div>
+        <div class="tiny muted">${o.id} ${o.mail_done ? '· handled' : ''}</div>
+      </div>
+    </div>`).join('');
+
+  const order = DEMO.orders.find(o => o.id === selected);
+  const pane = document.getElementById('reading');
+  if (!order) {
+    pane.innerHTML = `<div class="mailread"><p class="muted">Select a request from the inbox.</p></div>`;
+    return;
+  }
+
+  const ready = order.sheet_done && order.crm_done;
+  pane.innerHTML = `
+    <div class="mailread">
+      <div class="row between wrap" style="margin-bottom:4px">
+        <h2>${FM.escape(order.request)}</h2>
+        <span class="pill ${order.mail_done ? 'pill-high' : 'pill-low'}">${order.mail_done ? 'Handled' : 'Open'}</span>
+      </div>
+      <div class="small muted" style="margin-bottom:18px">
+        From ${FM.escape(order.customer)} &nbsp;·&nbsp; Reference ${order.id} &nbsp;·&nbsp; Item: ${FM.escape(order.item)}
+      </div>
+      <p style="margin-bottom:18px">${FM.escape(order.request_detail)}</p>
+
+      <div class="stack" style="gap:10px">
+        <div class="field">
+          <div style="flex:1;min-width:200px">
+            <div class="flabel">Current address on file</div>
+            <div class="fvalue" style="color:var(--muted);font-weight:500">${FM.escape(order.old_value)}</div>
+          </div>
+        </div>
+        <div class="field">
+          <div style="flex:1;min-width:200px">
+            <div class="flabel">New delivery address</div>
+            <div class="fvalue" id="newaddr">${FM.escape(order.new_value)}</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="copy-address"
+                  data-value="${FM.escape(order.new_value)}">Copy address</button>
+        </div>
+      </div>
+
+      ${order.mail_done ? `
+        <div class="nextstep">
+          <span class="n">✓</span>
+          <div><b>Request handled.</b> <span class="muted">Open the next request in the inbox.</span></div>
+        </div>` : ready ? `
+        <div class="nextstep">
+          <span class="n">4</span>
+          <div style="flex:1;min-width:200px">
+            <b>Back in FlowMail.</b>
+            <span class="muted">FlowSheet and FlowCRM are updated — close this request.</span>
+          </div>
+          <button class="btn btn-primary" onclick="closeRequest('${order.id}')">Mark as handled</button>
+        </div>` : `
+        <div class="nextstep">
+          <span class="n">2</span>
+          <div style="flex:1;min-width:220px">
+            <b>Next:</b> <span class="muted">update the delivery address for ${order.id} in FlowSheet.</span>
+            <div class="hintline">Copy the new address above, then continue. Paste with <kbd>Ctrl</kbd>+<kbd>V</kbd>.</div>
+          </div>
+          <a class="btn btn-primary" href="/demo/sheet">Open FlowSheet →</a>
+        </div>`}
+    </div>`;
+
+  const copyBtn = document.getElementById('copy-address');
+  if (copyBtn) copyBtn.addEventListener('click', () => DEMO.copy(copyBtn.dataset.value, copyBtn));
+}
+
+function select(id) { selected = id; render(); }
+
+async function closeRequest(id) {
+  await DEMO.mark(id, 'mail');
+  selected = null;
+  await render();
+  FM.toast('Request marked as handled');
+}
+
+render();
+</script>
+</body>
+</html>

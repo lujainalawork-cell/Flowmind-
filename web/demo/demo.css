@@ -1,0 +1,155 @@
+/* Local demo environment: three small business-tool stand-ins.
+   These are original FlowMind demo applications. They resemble the CATEGORY of
+   tool (inbox, spreadsheet, customer record) without copying any real product. */
+
+body { background: #F4F5F8; }
+
+/* ------------------------------------------------------------- test strip */
+
+.teststrip {
+  background: var(--navy);
+  color: #fff;
+  padding: 9px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.teststrip .badge {
+  background: rgba(255, 255, 255, .14);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.teststrip .step { color: #C9DAFF; }
+.teststrip .step b { color: #fff; font-weight: 600; }
+.teststrip a { color: var(--lime); font-weight: 600; }
+.teststrip .progress { margin-left: auto; display: flex; gap: 5px; align-items: center; }
+.teststrip .pipd { width: 22px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.22); }
+.teststrip .pipd.done { background: var(--lime); }
+
+/* -------------------------------------------------------------- app chrome */
+
+.appbar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.applogo {
+  width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center;
+  color: #fff; font-weight: 700; font-size: 12px;
+}
+.appname { font-weight: 700; font-size: 16px; color: #1B2440; letter-spacing: -.01em; }
+.appbar .who {
+  margin-left: auto; font-size: 13px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #E3E6EF; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+}
+
+.shell { max-width: 1020px; margin: 0 auto; padding: 26px 22px 70px; }
+
+/* theme per app */
+.mail .applogo { background: #4A6CF7; }
+.sheet .applogo { background: #1F9D62; }
+.crm .applogo { background: #11358B; }
+
+/* ----------------------------------------------------------------- mail */
+
+.maillayout { display: grid; grid-template-columns: 290px 1fr; gap: 18px; }
+@media (max-width: 860px) { .maillayout { grid-template-columns: 1fr; } }
+
+.maillist { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.mailitem {
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
+  cursor: pointer; display: flex; gap: 11px; align-items: flex-start;
+}
+.mailitem:last-child { border-bottom: 0; }
+.mailitem:hover { background: #F7F9FF; }
+.mailitem.active { background: #EEF3FF; box-shadow: inset 3px 0 0 #4A6CF7; }
+.mailitem.done { opacity: .5; }
+.mailitem .sub { font-size: 12.5px; color: var(--muted); }
+.mailitem .from { font-weight: 600; font-size: 13.5px; color: #1B2440; }
+
+.mailread { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 26px; }
+
+.field {
+  background: #F6F8FE; border: 1px solid var(--blue-line);
+  border-radius: 12px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.field .flabel { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.field .fvalue { font-size: 16px; font-weight: 600; color: var(--navy); user-select: all; }
+
+.nextstep {
+  margin-top: 22px; padding: 16px 18px;
+  border: 1px solid var(--blue-line); background: #F6F9FF;
+  border-radius: 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.nextstep .n {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--blue);
+  color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none;
+}
+
+/* ------------------------------------------------------------- spreadsheet */
+
+.sheetwrap { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+table.sheet-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.sheet-table th {
+  background: #F3F6F4; text-align: left; padding: 11px 14px;
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: #5A6B63; font-weight: 600; border-bottom: 1px solid var(--line);
+}
+table.sheet-table td { padding: 12px 14px; border-bottom: 1px solid #EEF1F0; color: #2A3341; }
+table.sheet-table tr:last-child td { border-bottom: 0; }
+table.sheet-table tr.target { background: #F2FBF6; }
+table.sheet-table tr.target td:first-child { box-shadow: inset 3px 0 0 #1F9D62; }
+table.sheet-table td.ref { font-family: 'SFMono-Regular', Consolas, monospace; font-weight: 600; color: #1B2440; }
+.cellinput {
+  width: 100%; font-family: var(--font); font-size: 13.5px;
+  border: 2px solid #1F9D62; border-radius: 8px; padding: 7px 10px;
+  outline: none; background: #fff;
+}
+.tag-updated { background: #E4F6EC; color: #157347; font-weight: 600; font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
+.tag-pending { background: #F1F2F6; color: #6C7689; font-weight: 600; font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
+
+/* -------------------------------------------------------------------- crm */
+
+.crmgrid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
+@media (max-width: 860px) { .crmgrid { grid-template-columns: 1fr; } }
+.crmcard { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+.crmfield { padding: 12px 0; border-bottom: 1px solid #F0F2F7; }
+.crmfield:last-child { border-bottom: 0; }
+.crmfield .k { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.crmfield .v { font-size: 14.5px; color: #1B2440; font-weight: 500; margin-top: 2px; }
+.textinput {
+  width: 100%; font-family: var(--font); font-size: 14px;
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  outline: none; background: #fff; color: #1B2440;
+}
+.textinput:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(97,146,252,.16); }
+select.textinput { cursor: pointer; }
+
+.hintline { font-size: 12.5px; color: var(--muted); margin-top: 7px; }
+kbd {
+  background: #fff; border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 6px; padding: 1px 6px; font-size: 11.5px; font-family: var(--font);
+  font-weight: 600; color: var(--navy);
+}
+
+.done-banner {
+  background: var(--lime-soft); border: 1px solid #DCEFA8;
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}

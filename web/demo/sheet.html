@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowSheet — Orders</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231F9D62'/><path d='M8 9h16v14H8z M8 14h16 M14 9v14' fill='none' stroke='white' stroke-width='2'/></svg>">
+<link rel="stylesheet" href="/static/shared/flowmind.css">
+<link rel="stylesheet" href="/static/demo/demo.css">
+</head>
+<body class="sheet">
+<div id="strip"></div>
+
+<div class="appbar">
+  <div class="applogo">FS</div>
+  <div>
+    <div class="appname">FlowSheet</div>
+    <div class="tiny muted" style="margin-top:-2px">Orders · Q3 deliveries</div>
+  </div>
+  <div class="who"><span>operations workbook</span><span class="avatar">OP</span></div>
+</div>
+
+<div class="shell">
+  <div id="banner"></div>
+  <div class="sheetwrap">
+    <table class="sheet-table">
+      <thead>
+        <tr>
+          <th style="width:110px">Order</th>
+          <th style="width:150px">Customer</th>
+          <th>Delivery address</th>
+          <th style="width:130px">Status</th>
+          <th style="width:110px"></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <div id="next"></div>
+</div>
+
+<script src="/static/shared/flowmind.js"></script>
+<script src="/static/demo/demo.js"></script>
+<script>
+let editing = null;
+
+async function render() {
+  const data = await DEMO.load();
+  const current = DEMO.current();
+
+  document.getElementById('strip').innerHTML = DEMO.strip({
+    step: 2, total: 4,
+    instruction: current
+      ? `Paste the new address into row <b>${current.id}</b> and save.`
+      : 'All requests handled.',
+    data,
+  });
+
+  document.getElementById('rows').innerHTML = DEMO.orders.map(o => {
+    const isTarget = current && o.id === current.id;
+    const address = o.sheet_done ? o.new_value : o.old_value;
+    const cell = (editing === o.id)
+      ? `<input class="cellinput" id="addr-${o.id}" placeholder="Paste the new address (Ctrl+V)" autocomplete="off">`
+      : FM.escape(address);
+    const action = (editing === o.id)
+      ? `<button class="btn btn-primary btn-sm" onclick="save('${o.id}')">Save</button>`
+      : (o.sheet_done
+          ? `<span class="tag-updated">Updated</span>`
+          : `<button class="btn btn-secondary btn-sm" onclick="edit('${o.id}')">Edit</button>`);
+    return `
+      <tr class="${isTarget ? 'target' : ''}">
+        <td class="ref">${o.id}</td>
+        <td>${FM.escape(o.customer)}</td>
+        <td>${cell}</td>
+        <td>${o.sheet_done ? '<span class="tag-updated">Address updated</span>' : '<span class="tag-pending">Awaiting update</span>'}</td>
+        <td style="text-align:right">${action}</td>
+      </tr>`;
+  }).join('');
+
+  if (editing) {
+    const input = document.getElementById('addr-' + editing);
+    if (input) input.focus();
+  }
+
+  const nextEl = document.getElementById('next');
+  if (!current) {
+    nextEl.innerHTML = `
+      <div class="nextstep" style="margin-top:20px">
+        <span class="n">✓</span>
+        <div style="flex:1"><b>Nothing left to update.</b> <span class="muted">All requests have been handled.</span></div>
+        <a class="btn btn-primary" href="/">Back to FlowMind</a>
+      </div>`;
+  } else if (current.sheet_done) {
+    nextEl.innerHTML = `
+      <div class="nextstep" style="margin-top:20px">
+        <span class="n">3</span>
+        <div style="flex:1;min-width:230px">
+          <b>Next:</b> <span class="muted">update the customer record for ${FM.escape(current.customer)} in FlowCRM.</span>
+          <div class="hintline">Copy the order reference, then continue.</div>
+        </div>
+        <button class="btn btn-secondary" onclick="DEMO.copy('${current.id}', this)">Copy ${current.id}</button>
+        <a class="btn btn-primary" href="/demo/crm">Open FlowCRM →</a>
+      </div>`;
+  } else {
+    nextEl.innerHTML = `
+      <div class="nextstep" style="margin-top:20px">
+        <span class="n">2</span>
+        <div style="flex:1;min-width:230px">
+          <b>Update row ${current.id}.</b>
+          <span class="muted">Click Edit, paste the address you copied from FlowMail with <kbd>Ctrl</kbd>+<kbd>V</kbd>, then Save.</span>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="/demo/mail">← Back to FlowMail</a>
+      </div>`;
+  }
+}
+
+function edit(id) { editing = id; render(); }
+
+async function save(id) {
+  const input = document.getElementById('addr-' + id);
+  if (!input || !input.value.trim()) {
+    FM.toast('Paste the new address first (Ctrl+V)');
+    if (input) input.focus();
+    return;
+  }
+  editing = null;
+  await DEMO.mark(id, 'sheet');
+  await render();
+  FM.toast('Row ' + id + ' updated');
+}
+
+render();
+</script>
+</body>
+</html>
